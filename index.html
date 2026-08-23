@@ -1,0 +1,1495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOCALY — Buy local. Sell local.</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3E5C3C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LOCALY">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F2E8;
+    --card:#FFFDF7;
+    --ink:#22301D;
+    --ink-soft:#5B6650;
+    --pine:#3E5C3C;
+    --pine-dark:#2A4028;
+    --pine-tint:#E4ECDE;
+    --marigold:#E7A23A;
+    --marigold-dark:#B9791F;
+    --clay:#A8442A;
+    --clay-tint:#F3DCD3;
+    --line:#DED2B4;
+    --line-soft:#EAE1C9;
+    --radius:18px;
+    --radius-sm:12px;
+    --shadow:0 2px 10px rgba(34,48,29,0.08), 0 1px 2px rgba(34,48,29,0.06);
+    --shadow-lift:0 10px 24px rgba(34,48,29,0.14);
+    font-size:16px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:#DCD2B6;
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .display{font-family:'Baloo 2',sans-serif;}
+
+  #app-frame{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--paper);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 60px rgba(0,0,0,0.25);
+    overflow:hidden;
+  }
+  @media(min-width:431px){
+    body{padding:24px 0;}
+    #app-frame{min-height:calc(100vh - 48px); border-radius:28px; max-height:900px;}
+  }
+
+  /* ---------- scrollable page area ---------- */
+  #page{
+    flex:1;
+    overflow-y:auto;
+    padding-bottom:86px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #page::-webkit-scrollbar{width:0;}
+
+  /* ---------- top header ---------- */
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    background:var(--paper);
+    padding:14px 16px 10px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .topbar-row{display:flex; align-items:center; justify-content:space-between;}
+  .brandmark{display:flex; align-items:center; gap:8px;}
+  .brandmark .pin-logo{width:26px;height:26px;flex:none;}
+  .brandmark .name{font-family:'Baloo 2'; font-weight:800; font-size:20px; color:var(--pine-dark); letter-spacing:0.2px;}
+  .top-icons{display:flex; gap:6px;}
+  .icon-btn{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--card); border:1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; position:relative; flex:none;
+  }
+  .icon-btn:active{transform:scale(0.94);}
+  .badge-dot{position:absolute; top:5px; right:6px; width:8px; height:8px; border-radius:50%; background:var(--clay); border:1.5px solid var(--paper);}
+  .location-chip{
+    margin-top:10px; display:inline-flex; align-items:center; gap:6px;
+    background:var(--pine-tint); color:var(--pine-dark);
+    padding:6px 12px 6px 8px; border-radius:99px; font-size:13.5px; font-weight:600;
+    cursor:pointer; border:1px solid rgba(62,92,60,0.15);
+  }
+  .location-chip svg{width:14px;height:14px;}
+
+  .searchbar{
+    margin-top:12px; display:flex; align-items:center; gap:8px;
+    background:var(--card); border:1.5px solid var(--line); border-radius:14px;
+    padding:10px 12px; cursor:pointer;
+  }
+  .searchbar input{border:none; outline:none; background:transparent; font-size:14.5px; width:100%; font-family:'Inter'; color:var(--ink);}
+  .searchbar svg{flex:none; opacity:0.55;}
+  .filter-btn{flex:none; width:34px; height:34px; border-radius:9px; background:var(--pine); display:flex; align-items:center; justify-content:center;}
+
+  /* ---------- section headings ---------- */
+  .section{padding:18px 16px 4px;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px;}
+  .section-head h2{font-family:'Baloo 2'; font-size:17px; margin:0; color:var(--ink);}
+  .section-head .see-all{font-size:12.5px; font-weight:600; color:var(--pine); cursor:pointer;}
+
+  /* ---------- category rail ---------- */
+  .cat-rail{display:flex; gap:10px; overflow-x:auto; padding:2px 16px 6px; scrollbar-width:none;}
+  .cat-rail::-webkit-scrollbar{display:none;}
+  .cat-pill{
+    flex:none; display:flex; flex-direction:column; align-items:center; gap:6px;
+    width:64px; cursor:pointer;
+  }
+  .cat-pill .ic{
+    width:52px;height:52px;border-radius:16px; background:var(--card); border:1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:var(--shadow);
+  }
+  .cat-pill.active .ic{background:var(--pine); border-color:var(--pine);}
+  .cat-pill span{font-size:11px; font-weight:600; text-align:center; color:var(--ink-soft); line-height:1.15;}
+  .cat-pill.active span{color:var(--pine-dark);}
+
+  /* ---------- listing cards ---------- */
+  .h-scroll{display:flex; gap:12px; overflow-x:auto; padding:2px 16px 10px; scrollbar-width:none;}
+  .h-scroll::-webkit-scrollbar{display:none;}
+  .card{
+    background:var(--card); border-radius:var(--radius); border:1px solid var(--line-soft);
+    box-shadow:var(--shadow); position:relative; cursor:pointer; overflow:hidden;
+  }
+  .listing-card{flex:none; width:158px;}
+  .listing-card .img{height:120px; width:100%; display:flex; align-items:center; justify-content:center; font-size:40px; position:relative;}
+  .pin-tab{
+    position:absolute; top:8px; left:8px; width:22px; height:22px; border-radius:50%;
+    background:var(--marigold); box-shadow:0 2px 4px rgba(0,0,0,0.25); z-index:2;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .pin-tab::after{content:''; width:6px;height:6px;border-radius:50%;background:var(--marigold-dark);}
+  .fav-btn{
+    position:absolute; top:6px; right:6px; width:28px;height:28px;border-radius:50%;
+    background:rgba(255,253,247,0.92); display:flex;align-items:center;justify-content:center; z-index:2;
+    border:none; cursor:pointer;
+  }
+  .card-body{padding:9px 10px 11px;}
+  .card-title{font-size:13.5px; font-weight:600; line-height:1.25; margin:0 0 4px; color:var(--ink); display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;}
+  .card-price{font-family:'JetBrains Mono'; font-weight:700; font-size:14.5px; color:var(--pine-dark);}
+  .tear-tab{
+    display:inline-flex; align-items:center; gap:4px; margin-top:6px;
+    font-size:11px; font-weight:600; color:var(--ink-soft);
+    border-top:1px dashed var(--line); padding-top:6px; width:100%;
+  }
+  .list-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:2px 16px 10px;}
+  .grid-card .img{height:110px;}
+
+  /* full width row listing (explore/list view) */
+  .row-card{display:flex; gap:12px; background:var(--card); border:1px solid var(--line-soft); border-radius:var(--radius); padding:10px; margin:0 16px 12px; box-shadow:var(--shadow); position:relative; cursor:pointer;}
+  .row-card .img{width:84px;height:84px;border-radius:12px; flex:none; display:flex;align-items:center;justify-content:center;font-size:30px; position:relative; overflow:hidden;}
+  .row-card .info{flex:1; min-width:0;}
+  .row-card .card-title{font-size:14.5px; -webkit-line-clamp:2;}
+  .row-card .meta{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+
+  .swatch{background-size:cover; background-position:center;}
+
+  /* ---------- bottom nav ---------- */
+  #bottomnav{
+    position:absolute; left:0; right:0; bottom:0; height:70px;
+    background:var(--card); border-top:1px solid var(--line-soft);
+    display:flex; align-items:center; justify-content:space-around; z-index:30;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .nav-item{display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; color:var(--ink-soft); flex:1;}
+  .nav-item.active{color:var(--pine-dark);}
+  .nav-item span{font-size:10.5px; font-weight:600;}
+  .nav-sell{
+    width:52px;height:52px;border-radius:50%; background:var(--pine); margin-top:-26px;
+    display:flex;align-items:center;justify-content:center; box-shadow:0 6px 14px rgba(42,64,40,0.35);
+    border:3px solid var(--paper);
+  }
+
+  /* ---------- overlay / sheet ---------- */
+  .overlay{
+    position:absolute; inset:0; z-index:100; background:rgba(34,48,29,0.42);
+    display:none; align-items:flex-end; justify-content:center;
+  }
+  .overlay.show{display:flex;}
+  .overlay.center{align-items:center;}
+  .sheet{
+    background:var(--paper); width:100%; max-height:92%; border-radius:22px 22px 0 0;
+    display:flex; flex-direction:column; animation:slideUp .22s ease;
+  }
+  .overlay.center .sheet{border-radius:22px; max-height:88%; margin:0 16px; width:calc(100% - 32px);}
+  @keyframes slideUp{from{transform:translateY(24px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+  .sheet-head{display:flex; align-items:center; justify-content:space-between; padding:16px 16px 10px; border-bottom:1px solid var(--line-soft); flex:none;}
+  .sheet-head h3{font-family:'Baloo 2'; margin:0; font-size:18px;}
+  .sheet-body{overflow-y:auto; padding:16px;}
+  .close-x{width:32px;height:32px;border-radius:50%;background:var(--pine-tint); display:flex;align-items:center;justify-content:center; cursor:pointer; border:none;}
+
+  /* screens are full page overlays */
+  .screen{position:absolute; inset:0; background:var(--paper); z-index:200; display:none; flex-direction:column;}
+  .screen.show{display:flex;}
+  .screen-head{display:flex; align-items:center; gap:10px; padding:14px 14px 10px; border-bottom:1px solid var(--line-soft); flex:none;}
+  .back-btn{width:34px;height:34px;border-radius:50%;background:var(--card); border:1px solid var(--line-soft); display:flex;align-items:center;justify-content:center; cursor:pointer; flex:none;}
+  .screen-head h2{font-family:'Baloo 2'; font-size:17px; margin:0;}
+  .screen-body{flex:1; overflow-y:auto;}
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:12px 18px; border-radius:12px; font-weight:700; font-size:14.5px;
+    border:none; cursor:pointer; font-family:'Inter';
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--pine); color:#fff;}
+  .btn-secondary{background:var(--pine-tint); color:var(--pine-dark);}
+  .btn-marigold{background:var(--marigold); color:#3A2705;}
+  .btn-outline{background:transparent; border:1.5px solid var(--line); color:var(--ink);}
+  .btn-clay{background:var(--clay-tint); color:var(--clay);}
+  .btn-block{width:100%;}
+  .btn-sm{padding:8px 12px; font-size:13px; border-radius:9px;}
+
+  input[type=text], input[type=email], input[type=password], input[type=number], textarea, select{
+    width:100%; padding:12px 13px; border-radius:12px; border:1.5px solid var(--line);
+    background:var(--card); font-family:'Inter'; font-size:14.5px; color:var(--ink); outline:none;
+  }
+  input:focus, textarea:focus, select:focus{border-color:var(--pine);}
+  label.field-label{font-size:12.5px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.4px; margin:14px 0 6px; display:block;}
+  textarea{resize:vertical; min-height:80px;}
+
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap;}
+  .chip{padding:8px 14px; border-radius:99px; border:1.5px solid var(--line); font-size:13px; font-weight:600; cursor:pointer; background:var(--card); color:var(--ink-soft);}
+  .chip.active{background:var(--pine); border-color:var(--pine); color:#fff;}
+
+  .empty-state{text-align:center; padding:50px 24px; color:var(--ink-soft);}
+  .empty-state .big{font-size:40px; margin-bottom:8px;}
+
+  .stars{color:var(--marigold-dark); font-size:13px; letter-spacing:1px;}
+  .rating-line{display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft);}
+
+  .safety-note{
+    background:var(--clay-tint); color:var(--clay); border-radius:12px; padding:10px 12px;
+    font-size:12.5px; font-weight:600; display:flex; gap:8px; align-items:flex-start; margin:10px 0;
+  }
+
+  /* messages */
+  .convo-row{display:flex; gap:12px; align-items:center; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--line-soft);}
+  .avatar{width:46px;height:46px;border-radius:50%; background:var(--pine-tint); display:flex;align-items:center;justify-content:center; font-weight:700; color:var(--pine-dark); flex:none; font-family:'Baloo 2';}
+  .convo-row .info{flex:1; min-width:0;}
+  .convo-row .name-row{display:flex; justify-content:space-between; font-size:13.5px;}
+  .convo-row .preview{font-size:12.5px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+
+  .msg-list{padding:14px; display:flex; flex-direction:column; gap:10px;}
+  .bubble{max-width:78%; padding:10px 13px; border-radius:16px; font-size:14px; line-height:1.35;}
+  .bubble.them{background:var(--card); border:1px solid var(--line-soft); align-self:flex-start; border-bottom-left-radius:4px;}
+  .bubble.me{background:var(--pine); color:#fff; align-self:flex-end; border-bottom-right-radius:4px;}
+  .propose-card{max-width:82%; background:var(--card); border:1.5px solid var(--marigold); border-radius:16px; padding:12px; align-self:center; width:82%;}
+  .propose-card h4{margin:0 0 4px; font-family:'Baloo 2'; font-size:14px;}
+  .propose-card .row-actions{display:flex; gap:8px; margin-top:10px;}
+  .msg-input-row{display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--line-soft); flex:none; background:var(--paper);}
+  .msg-input-row input{flex:1;}
+  .round-send{width:42px;height:42px;border-radius:50%; background:var(--pine); border:none; display:flex;align-items:center;justify-content:center; flex:none; cursor:pointer;}
+  .quick-actions{display:flex; gap:8px; padding:0 12px 10px; overflow-x:auto;}
+
+  .status-track{display:flex; align-items:center; padding:14px 16px 4px; gap:4px;}
+  .status-dot{width:9px;height:9px;border-radius:50%; background:var(--line); flex:none;}
+  .status-dot.done{background:var(--pine);}
+  .status-line{flex:1; height:2px; background:var(--line);}
+  .status-line.done{background:var(--pine);}
+
+  .toast{
+    position:absolute; left:50%; top:16px; transform:translateX(-50%); z-index:500;
+    background:var(--ink); color:#fff; padding:10px 18px; border-radius:99px; font-size:13.5px; font-weight:600;
+    box-shadow:var(--shadow-lift); opacity:0; transition:opacity .25s, top .25s; pointer-events:none;
+  }
+  .toast.show{opacity:1; top:26px;}
+
+  /* map */
+  .map-canvas{
+    position:relative; height:340px; margin:0 16px 14px; border-radius:var(--radius);
+    background:
+      radial-gradient(circle at 30% 20%, rgba(62,92,60,0.10), transparent 40%),
+      radial-gradient(circle at 75% 65%, rgba(231,162,58,0.12), transparent 45%),
+      repeating-linear-gradient(0deg, var(--pine-tint) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(90deg, var(--pine-tint) 0 1px, transparent 1px 34px),
+      var(--card);
+    border:1px solid var(--line-soft); overflow:hidden;
+  }
+  .map-you{position:absolute; width:14px; height:14px; border-radius:50%; background:var(--clay); border:3px solid #fff; box-shadow:0 0 0 5px rgba(168,68,42,0.18); transform:translate(-50%,-50%);}
+  .map-pin{position:absolute; transform:translate(-50%,-100%); cursor:pointer; text-align:center;}
+  .map-pin .dot{width:30px;height:30px;border-radius:50% 50% 50% 0; background:var(--pine); transform:rotate(45deg); box-shadow:var(--shadow-lift); display:flex; align-items:center; justify-content:center;}
+  .map-pin .dot span{transform:rotate(-45deg); font-size:14px;}
+  .map-pin .lbl{margin-top:2px; font-size:10.5px; font-weight:700; background:var(--card); border-radius:6px; padding:1px 5px; border:1px solid var(--line-soft); font-family:'JetBrains Mono';}
+
+  .toggle-pair{display:flex; background:var(--card); border:1px solid var(--line-soft); border-radius:11px; padding:3px; gap:3px;}
+  .toggle-pair button{flex:1; border:none; background:transparent; padding:8px; border-radius:8px; font-weight:700; font-size:13px; color:var(--ink-soft); cursor:pointer;}
+  .toggle-pair button.active{background:var(--pine); color:#fff;}
+
+  .onb-screen{position:absolute; inset:0; background:var(--pine-dark); z-index:1000; display:none; flex-direction:column; color:#fff; text-align:center;}
+  .onb-screen.show{display:flex;}
+  .onb-content{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px;}
+  .onb-dots{display:flex; gap:6px; justify-content:center; padding:14px 0;}
+  .onb-dots span{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.3);}
+  .onb-dots span.on{background:#fff; width:20px; border-radius:4px;}
+  .onb-footer{padding:20px 28px 36px;}
+
+  .review-stars-input{display:flex; gap:6px; justify-content:center; font-size:34px; margin:10px 0;}
+  .review-stars-input span{cursor:pointer; opacity:0.35;}
+  .review-stars-input span.on{opacity:1;}
+
+  .biz-cover{height:110px; background:linear-gradient(120deg, var(--pine), var(--pine-dark)); position:relative;}
+  .biz-logo{width:72px;height:72px;border-radius:18px; background:var(--marigold); border:4px solid var(--paper); position:absolute; left:16px; bottom:-30px; display:flex;align-items:center;justify-content:center; font-size:30px; box-shadow:var(--shadow);}
+
+  .adm-row{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line-soft); font-size:13.5px;}
+  .adm-tag{font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:99px; background:var(--pine-tint); color:var(--pine-dark);}
+  .adm-tag.warn{background:var(--clay-tint); color:var(--clay);}
+</style>
+</head>
+<body>
+<div id="app-frame">
+
+  <!-- ============ ONBOARDING ============ -->
+  <div class="onb-screen show" id="onb1">
+    <div class="onb-content">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none"><path d="M32 4C19 4 9 14 9 26c0 17 23 34 23 34s23-17 23-34C55 14 45 4 32 4z" fill="#E7A23A"/><circle cx="32" cy="25" r="10" fill="#2A4028"/></svg>
+      <h1 class="display" style="font-size:32px;margin:18px 0 6px;">LOCALY</h1>
+      <p style="opacity:0.85; font-size:15px;">Buy local. Sell local.</p>
+    </div>
+    <div class="onb-dots"><span class="on"></span><span></span><span></span><span></span></div>
+    <div class="onb-footer"><button class="btn btn-marigold btn-block" onclick="goOnb(2)">Get started</button></div>
+  </div>
+
+  <div class="onb-screen" id="onb2">
+    <div class="onb-content">
+      <div style="font-size:46px;">📍</div>
+      <h2 class="display" style="font-size:22px;margin:16px 0 8px;">Where are you shopping?</h2>
+      <p style="opacity:0.85;font-size:14px;max-width:280px;">We'll show you products and services from people nearby — never your exact address.</p>
+      <div style="margin-top:26px; display:flex; flex-direction:column; gap:10px; width:100%; max-width:280px;">
+        <button class="btn btn-marigold btn-block" onclick="useMyLocation()">Use my location</button>
+        <button class="btn btn-outline btn-block" style="border-color:rgba(255,255,255,0.5); color:#fff;" onclick="goOnb(3)">Choose my area</button>
+      </div>
+    </div>
+    <div class="onb-dots"><span></span><span class="on"></span><span></span><span></span></div>
+  </div>
+
+  <div class="onb-screen" id="onb3">
+    <div class="onb-content">
+      <h2 class="display" style="font-size:22px;margin-bottom:16px;">How wide should we look?</h2>
+      <div style="display:flex; flex-direction:column; gap:10px; width:100%; max-width:290px;">
+        <div class="onb-radius-opt" data-v="Neighborhood" onclick="pickRadius(this)">🏘️ Neighborhood — Alta Loma</div>
+        <div class="onb-radius-opt" data-v="City" onclick="pickRadius(this)">🏙️ City — Rancho Cucamonga</div>
+        <div class="onb-radius-opt" data-v="Nearby" onclick="pickRadius(this)">📡 Nearby — 5 mile radius</div>
+      </div>
+    </div>
+    <div class="onb-dots"><span></span><span></span><span class="on"></span><span></span></div>
+    <div class="onb-footer"><button class="btn btn-marigold btn-block" onclick="goOnb(4)">Continue</button></div>
+  </div>
+
+  <div class="onb-screen" id="onb4">
+    <div class="onb-content" style="justify-content:flex-start; padding-top:40px;">
+      <h2 class="display" style="font-size:22px;margin-bottom:16px;">Create your account</h2>
+      <div style="width:100%; max-width:300px; text-align:left;">
+        <input type="text" id="ob-name" placeholder="Full name" style="margin-bottom:10px;">
+        <input type="text" id="ob-user" placeholder="Username" style="margin-bottom:10px;">
+        <input type="email" id="ob-email" placeholder="Email" style="margin-bottom:10px;">
+        <input type="password" id="ob-pass" placeholder="Password" style="margin-bottom:10px;">
+      </div>
+    </div>
+    <div class="onb-dots"><span></span><span></span><span></span><span class="on"></span></div>
+    <div class="onb-footer"><button class="btn btn-marigold btn-block" onclick="finishOnboarding()">Enter LOCALY</button></div>
+  </div>
+
+  <style>
+    .onb-radius-opt{background:rgba(255,255,255,0.08); border:1.5px solid rgba(255,255,255,0.25); padding:14px; border-radius:14px; text-align:left; font-weight:600; font-size:14.5px; cursor:pointer;}
+    .onb-radius-opt.sel{border-color:#E7A23A; background:rgba(231,162,58,0.18);}
+  </style>
+
+  <!-- ============ MAIN APP ============ -->
+  <div id="page">
+    <!-- ---- HOME ---- -->
+    <div id="page-home">
+      <div class="topbar">
+        <div class="topbar-row">
+          <div class="brandmark">
+            <svg class="pin-logo" viewBox="0 0 64 64" fill="none"><path d="M32 4C19 4 9 14 9 26c0 17 23 34 23 34s23-17 23-34C55 14 45 4 32 4z" fill="#E7A23A"/><circle cx="32" cy="25" r="10" fill="#2A4028"/></svg>
+            <span class="name">LOCALY</span>
+          </div>
+          <div class="top-icons">
+            <div class="icon-btn" onclick="openSheet('notif-sheet')"><span class="badge-dot" id="notif-dot"></span>🔔</div>
+            <div class="icon-btn" onclick="nav('profile')">👤</div>
+          </div>
+        </div>
+        <div class="location-chip" onclick="openSheet('location-sheet')">
+          📍 <span id="loc-label">Rancho Cucamonga</span> ▾
+        </div>
+        <div class="searchbar" onclick="openSearch()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input placeholder="Search your local area..." readonly>
+        </div>
+      </div>
+
+      <div class="cat-rail" id="home-cats"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>Trending near you</h2><span class="see-all" onclick="nav('explore')">See all</span></div>
+      </div>
+      <div class="h-scroll" id="row-trending"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>Recently listed</h2><span class="see-all" onclick="nav('explore')">See all</span></div>
+      </div>
+      <div class="h-scroll" id="row-recent"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>Popular services</h2><span class="see-all" onclick="nav('explore')">See all</span></div>
+      </div>
+      <div class="h-scroll" id="row-services"></div>
+
+      <div class="section">
+        <div class="section-head"><h2>Local businesses</h2><span class="see-all" onclick="nav('explore')">See all</span></div>
+      </div>
+      <div class="h-scroll" id="row-biz"></div>
+      <div style="height:8px;"></div>
+    </div>
+
+    <!-- ---- EXPLORE ---- -->
+    <div id="page-explore" style="display:none;">
+      <div class="topbar">
+        <div class="topbar-row"><h2 class="display" style="margin:0;font-size:19px;">Explore</h2>
+          <div class="toggle-pair" style="width:120px;">
+            <button class="active" id="ex-list-btn" onclick="setExploreView('list')">List</button>
+            <button id="ex-map-btn" onclick="setExploreView('map')">Map</button>
+          </div>
+        </div>
+        <div class="searchbar" onclick="openSearch()" style="margin-top:12px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input placeholder="Search your local area..." readonly>
+          <div class="filter-btn" onclick="event.stopPropagation();openSheet('filter-sheet')">⚙️</div>
+        </div>
+        <div class="chip-row" style="margin-top:10px;">
+          <div class="chip active" data-f="trending" onclick="setExploreFilter(this,'trending')">Trending</div>
+          <div class="chip" data-f="recent" onclick="setExploreFilter(this,'recent')">Recently listed</div>
+          <div class="chip" data-f="free" onclick="setExploreFilter(this,'free')">Free items</div>
+          <div class="chip" data-f="u25" onclick="setExploreFilter(this,'u25')">Under $25</div>
+          <div class="chip" data-f="u50" onclick="setExploreFilter(this,'u50')">Under $50</div>
+          <div class="chip" data-f="closest" onclick="setExploreFilter(this,'closest')">Closest to you</div>
+        </div>
+      </div>
+      <div id="explore-list-view"></div>
+      <div id="explore-map-view" style="display:none;"></div>
+    </div>
+
+    <!-- ---- MESSAGES ---- -->
+    <div id="page-messages" style="display:none;">
+      <div class="topbar"><div class="topbar-row"><h2 class="display" style="margin:0;font-size:19px;">Messages</h2></div></div>
+      <div id="convo-list"></div>
+    </div>
+
+    <!-- ---- PROFILE ---- -->
+    <div id="page-profile" style="display:none;">
+      <div class="topbar"><div class="topbar-row"><h2 class="display" style="margin:0;font-size:19px;">Profile</h2>
+        <div class="icon-btn" onclick="openSheet('profile-menu-sheet')">⋯</div>
+      </div></div>
+      <div id="profile-body" style="padding:18px 16px;"></div>
+    </div>
+  </div>
+
+  <!-- ---------- bottom nav ---------- -->
+  <div id="bottomnav">
+    <div class="nav-item active" data-p="home" onclick="nav('home')">🏠<span>Home</span></div>
+    <div class="nav-item" data-p="explore" onclick="nav('explore')">🔎<span>Explore</span></div>
+    <div class="nav-item" onclick="openSell()"><div class="nav-sell">➕</div></div>
+    <div class="nav-item" data-p="messages" onclick="nav('messages')">💬<span>Messages</span></div>
+    <div class="nav-item" data-p="profile" onclick="nav('profile')">👤<span>Profile</span></div>
+  </div>
+
+  <!-- ---------- FULL SCREENS ---------- -->
+  <div class="screen" id="screen-listing">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-listing')">←</div><h2 id="listing-title-top">Listing</h2></div>
+    <div class="screen-body" id="listing-body"></div>
+  </div>
+
+  <div class="screen" id="screen-sell">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-sell')">←</div><h2>Create a listing</h2></div>
+    <div class="screen-body" id="sell-body"></div>
+  </div>
+
+  <div class="screen" id="screen-thread">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-thread')">←</div>
+      <div class="avatar" id="thread-avatar" style="width:36px;height:36px;font-size:13px;">U</div>
+      <h2 id="thread-name">Conversation</h2>
+    </div>
+    <div class="screen-body" id="thread-body" style="display:flex; flex-direction:column;">
+      <div id="thread-status"></div>
+      <div class="msg-list" id="thread-msgs" style="flex:1; overflow-y:auto;"></div>
+    </div>
+    <div class="quick-actions" id="thread-quick"></div>
+    <div class="msg-input-row">
+      <input type="text" id="thread-input" placeholder="Type a message...">
+      <button class="round-send" onclick="sendThreadMsg()">➤</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-business">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-business')">←</div><h2>Business</h2></div>
+    <div class="screen-body" id="business-body"></div>
+  </div>
+
+  <div class="screen" id="screen-favorites">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-favorites')">←</div><h2>Favorites</h2></div>
+    <div class="screen-body" id="favorites-body"></div>
+  </div>
+
+  <div class="screen" id="screen-admin">
+    <div class="screen-head"><div class="back-btn" onclick="closeScreen('screen-admin')">←</div><h2>Admin dashboard</h2></div>
+    <div class="screen-body" id="admin-body"></div>
+  </div>
+
+  <!-- ---------- OVERLAYS / SHEETS ---------- -->
+  <div class="overlay" id="location-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Change area</h3><button class="close-x" onclick="closeSheet(document.getElementById('location-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <label class="field-label">Area type</label>
+        <div class="chip-row" id="loc-type-chips">
+          <div class="chip" data-t="Neighborhood" onclick="setLocType(this)">Neighborhood</div>
+          <div class="chip" data-t="City" onclick="setLocType(this)">City</div>
+          <div class="chip" data-t="Town" onclick="setLocType(this)">Town</div>
+          <div class="chip" data-t="Nearby" onclick="setLocType(this)">Nearby</div>
+        </div>
+        <div id="loc-radius-wrap" style="display:none;">
+          <label class="field-label">Radius</label>
+          <div class="chip-row">
+            <div class="chip" data-r="1" onclick="setRadiusChip(this)">1 mi</div>
+            <div class="chip active" data-r="5" onclick="setRadiusChip(this)">5 mi</div>
+            <div class="chip" data-r="10" onclick="setRadiusChip(this)">10 mi</div>
+            <div class="chip" data-r="25" onclick="setRadiusChip(this)">25 mi</div>
+          </div>
+        </div>
+        <label class="field-label">Set area</label>
+        <input type="text" id="loc-input" value="Rancho Cucamonga, CA" style="margin-bottom:14px;">
+        <button class="btn btn-primary btn-block" onclick="applyLocation()">Apply area</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="search-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet" style="min-height:60%;">
+      <div class="sheet-head"><h3>Search</h3><button class="close-x" onclick="closeSheet(document.getElementById('search-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <input type="text" id="search-input" placeholder="Try 'bike', 'lawn mowing', 'gaming chair'..." oninput="runSearch()">
+        <div style="height:12px;"></div>
+        <div id="search-results"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="filter-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Filters</h3><button class="close-x" onclick="closeSheet(document.getElementById('filter-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <label class="field-label">Category</label>
+        <div class="chip-row" id="filter-cats"></div>
+        <label class="field-label">Distance</label>
+        <div class="chip-row">
+          <div class="chip active" data-d="25" onclick="setFilterChip(this,'dist')">Any</div>
+          <div class="chip" data-d="1" onclick="setFilterChip(this,'dist')">1 mi</div>
+          <div class="chip" data-d="5" onclick="setFilterChip(this,'dist')">5 mi</div>
+          <div class="chip" data-d="10" onclick="setFilterChip(this,'dist')">10 mi</div>
+        </div>
+        <label class="field-label">Price</label>
+        <div class="chip-row">
+          <div class="chip active" data-p="any" onclick="setFilterChip(this,'price')">Any</div>
+          <div class="chip" data-p="0-25" onclick="setFilterChip(this,'price')">$0–25</div>
+          <div class="chip" data-p="25-50" onclick="setFilterChip(this,'price')">$25–50</div>
+          <div class="chip" data-p="50-300" onclick="setFilterChip(this,'price')">$50–300</div>
+        </div>
+        <label class="field-label">Condition</label>
+        <div class="chip-row">
+          <div class="chip active" data-c="any" onclick="setFilterChip(this,'cond')">Any</div>
+          <div class="chip" data-c="New" onclick="setFilterChip(this,'cond')">New</div>
+          <div class="chip" data-c="Like New" onclick="setFilterChip(this,'cond')">Like New</div>
+          <div class="chip" data-c="Good" onclick="setFilterChip(this,'cond')">Good+</div>
+        </div>
+        <label class="field-label">Sort by</label>
+        <div class="chip-row">
+          <div class="chip active" data-s="newest" onclick="setFilterChip(this,'sort')">Newest</div>
+          <div class="chip" data-s="closest" onclick="setFilterChip(this,'sort')">Closest</div>
+          <div class="chip" data-s="cheapest" onclick="setFilterChip(this,'sort')">Cheapest</div>
+          <div class="chip" data-s="rated" onclick="setFilterChip(this,'sort')">Highest rated</div>
+        </div>
+        <div style="height:6px;"></div>
+        <button class="btn btn-primary btn-block" onclick="applyFilters()">Show results</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="notif-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Notifications</h3><button class="close-x" onclick="closeSheet(document.getElementById('notif-sheet'))">✕</button></div>
+      <div class="sheet-body" id="notif-list"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="profile-menu-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>More</h3><button class="close-x" onclick="closeSheet(document.getElementById('profile-menu-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <button class="btn btn-outline btn-block" style="margin-bottom:10px;" onclick="closeSheet(document.getElementById('profile-menu-sheet'));openScreen('screen-favorites');renderFavorites();">❤️ Favorites</button>
+        <button class="btn btn-outline btn-block" style="margin-bottom:10px;" onclick="closeSheet(document.getElementById('profile-menu-sheet'));openBusiness(DB.businesses[0].id)">🏪 My business profile</button>
+        <button class="btn btn-outline btn-block" style="margin-bottom:10px;" onclick="closeSheet(document.getElementById('profile-menu-sheet'));reportSomething()">🚩 Report a problem</button>
+        <button class="btn btn-outline btn-block" style="margin-bottom:10px;" onclick="closeSheet(document.getElementById('profile-menu-sheet'));openScreen('screen-admin');renderAdmin();">🛠️ Admin dashboard (demo)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay center" id="meetup-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Propose meetup</h3><button class="close-x" onclick="closeSheet(document.getElementById('meetup-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <div class="safety-note">⚠️ For safety, meet in a public place and let a trusted contact know where you're going.</div>
+        <label class="field-label">Suggested public locations</label>
+        <div class="chip-row" id="meetup-loc-chips">
+          <div class="chip" onclick="pickMeetupLoc(this,'Central Park')">Central Park</div>
+          <div class="chip" onclick="pickMeetupLoc(this,'Local Library')">Local Library</div>
+          <div class="chip" onclick="pickMeetupLoc(this,'Community Center')">Community Center</div>
+          <div class="chip" onclick="pickMeetupLoc(this,'Target Parking Lot')">Store parking lot</div>
+        </div>
+        <input type="text" id="meetup-loc-custom" placeholder="Or type another public location" style="margin-top:10px;">
+        <label class="field-label">Time</label>
+        <input type="text" id="meetup-time" placeholder="e.g. Saturday, 4:30 PM">
+        <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="sendMeetupProposal()">Send proposal</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay center" id="offer-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Make an offer</h3><button class="close-x" onclick="closeSheet(document.getElementById('offer-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <label class="field-label">Your offer ($)</label>
+        <input type="number" id="offer-amount">
+        <button class="btn btn-primary btn-block" style="margin-top:16px;" onclick="sendOffer()">Send offer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay center" id="payment-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Choose payment</h3><button class="close-x" onclick="closeSheet(document.getElementById('payment-sheet'))">✕</button></div>
+      <div class="sheet-body">
+        <button class="btn btn-outline btn-block" style="margin-bottom:10px; justify-content:flex-start;" onclick="choosePayment('Cash')">💵 &nbsp; Cash on pickup</button>
+        <button class="btn btn-outline btn-block" style="justify-content:flex-start;" onclick="choosePayment('Apple Pay')">🍎 &nbsp; Apple Pay</button>
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:14px;">Payments are tokenized through a secure processor — LOCALY never stores your card details. Cash isn't marked complete until both sides confirm.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay center" id="review-sheet" onclick="if(event.target===this)closeSheet(this)">
+    <div class="sheet">
+      <div class="sheet-head"><h3>Leave a review</h3><button class="close-x" onclick="closeSheet(document.getElementById('review-sheet'))">✕</button></div>
+      <div class="sheet-body" style="text-align:center;">
+        <p id="review-target" style="font-weight:700;"></p>
+        <div class="review-stars-input" id="review-stars">
+          <span data-v="1">⭐</span><span data-v="2">⭐</span><span data-v="3">⭐</span><span data-v="4">⭐</span><span data-v="5">⭐</span>
+        </div>
+        <textarea id="review-text" placeholder="Great seller! Item was exactly as described." style="text-align:left;"></textarea>
+        <button class="btn btn-primary btn-block" style="margin-top:14px;" onclick="submitReview()">Submit review</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ============================= DATA ============================= */
+const CATEGORIES = [
+  {id:'electronics',label:'Electronics',icon:'💻'},{id:'clothing',label:'Clothing',icon:'👕'},
+  {id:'shoes',label:'Shoes',icon:'👟'},{id:'sports',label:'Sports',icon:'🏀'},
+  {id:'gaming',label:'Gaming',icon:'🎮'},{id:'bikes',label:'Bikes',icon:'🚲'},
+  {id:'cars',label:'Cars',icon:'🚗'},{id:'furniture',label:'Furniture',icon:'🛋️'},
+  {id:'collectibles',label:'Collectibles',icon:'🧸'},{id:'toys',label:'Toys',icon:'🪁'},
+  {id:'school',label:'School',icon:'🎒'},{id:'handmade',label:'Handmade',icon:'🧵'},
+  {id:'food',label:'Food',icon:'🍞'},{id:'services',label:'Services',icon:'🛠️'},
+  {id:'jobs',label:'Jobs',icon:'💼'},{id:'other',label:'Other',icon:'📦'},
+];
+
+const DB = {
+  me:{id:'me', username:'you', displayName:'', area:'Rancho Cucamonga', rating:0, transactions:0},
+  users:[
+    {id:'u1', username:'colin', name:'Colin R.', rating:4.9, count:24},
+    {id:'u2', username:'maria', name:'Maria S.', rating:5.0, count:11},
+    {id:'u3', username:'devon', name:'Devon K.', rating:4.7, count:38},
+    {id:'u4', username:'priya', name:'Priya N.', rating:4.8, count:19},
+    {id:'u5', username:'big_tikers', name:'Big Tikers', rating:4.9, count:56},
+  ],
+  businesses:[
+    {id:'b1', ownerId:'u5', name:'Big Tikers', tagline:'Local e-bike clothing & custom shirts', category:'Handmade', logo:'👕', cover:'', area:'Rancho Cucamonga', hours:'Mon–Sat, 10am–6pm', rating:4.9, reviews:56}
+  ],
+  listings:[],
+  conversations:[],
+  transactions:[],
+  reviews:[],
+  notifications:[],
+  reports:[],
+  favorites:new Set(),
+};
+
+function seedListings(){
+  const items = [
+    {title:'Used BMX Bike', price:120, neg:true, cat:'bikes', cond:'Good', icon:'🚲', dist:2.1, seller:'u1', desc:'Barely used, great condition. Pegs included. Pickup only near Foothill.', type:'product', pickup:['Local pickup','Meet somewhere']},
+    {title:'Nike Basketball Shoes', price:45, neg:false, cat:'shoes', cond:'Like New', icon:'👟', dist:1.4, seller:'u2', desc:'Size 10, worn twice indoors. No box.', type:'product', pickup:['Meet somewhere']},
+    {title:'Gaming Chair', price:80, neg:true, cat:'gaming', cond:'Good', icon:'🪑', dist:3.6, seller:'u3', desc:'Comfortable, minor wear on armrests. Great for long sessions.', type:'product', pickup:['Buyer pickup']},
+    {title:'PS5 Controller', price:35, neg:false, cat:'gaming', cond:'Like New', icon:'🎮', dist:0.9, seller:'u4', desc:'Barely used DualSense, white.', type:'product', pickup:['Meet somewhere']},
+    {title:'Wooden Bookshelf', price:0, neg:false, cat:'furniture', cond:'Fair', icon:'📚', dist:4.2, seller:'u1', desc:'Free — just needs a good home. You haul.', type:'product', pickup:['Buyer pickup']},
+    {title:"Kids' Bike Helmet", price:12, neg:false, cat:'sports', cond:'Good', icon:'🪖', dist:1.7, seller:'u2', desc:'Size small, adjustable strap.', type:'product', pickup:['Meet somewhere']},
+    {title:'Vintage Baseball Cards (Lot)', price:60, neg:true, cat:'collectibles', cond:'Used', icon:'⚾', dist:5.0, seller:'u3', desc:"90s lot, ~40 cards, a few rookies.", type:'product', pickup:['Meet somewhere']},
+    {title:'Custom E-Bike Hoodie', price:38, neg:false, cat:'clothing', cond:'New', icon:'🧥', dist:2.3, seller:'u5', desc:'Big Tikers original print, size M/L/XL available.', type:'product', pickup:['Local pickup','Seller delivery'], biz:'b1'},
+    {title:'Graphing Calculator', price:25, neg:true, cat:'school', cond:'Good', icon:'🧮', dist:1.1, seller:'u4', desc:'TI-84 Plus, works great, minor scratches.', type:'product', pickup:['Meet somewhere']},
+    {title:'Handmade Ceramic Mug Set', price:22, neg:false, cat:'handmade', cond:'New', icon:'☕', dist:2.8, seller:'u2', desc:'Set of 2, glazed in sage green.', type:'product', pickup:['Local pickup']},
+  ];
+  const services = [
+    {title:'Lawn Mowing', price:25, neg:false, cat:'services', icon:'🌱', dist:1.5, seller:'u3', desc:'Weekly or one-time. Front & back, edging included.', type:'service', pickup:['Local pickup']},
+    {title:'Dog Walking', price:15, neg:false, cat:'services', icon:'🐕', dist:0.8, seller:'u4', desc:'30-min walks, flexible schedule, great with big dogs.', type:'service', pickup:['Local pickup']},
+    {title:'Car Detailing', price:70, neg:true, cat:'services', icon:'🚙', dist:3.0, seller:'u1', desc:'Interior + exterior, comes to your driveway.', type:'service', pickup:['Seller delivery']},
+    {title:'Bike Repair & Tune-up', price:30, neg:false, cat:'services', icon:'🔧', dist:2.1, seller:'u1', desc:'Brakes, gears, chain — same-day turnaround.', type:'service', pickup:['Local pickup']},
+    {title:'Tutoring (Algebra & Geometry)', price:20, neg:false, cat:'services', icon:'📐', dist:1.9, seller:'u4', desc:'Patient, experienced, in-home or virtual.', type:'service', pickup:['Local pickup']},
+    {title:'Custom Shirt Printing', price:18, neg:false, cat:'services', icon:'👕', dist:2.3, seller:'u5', desc:'Bring your design, ready in 2 days.', type:'service', pickup:['Local pickup'], biz:'b1'},
+  ];
+  [...items, ...services].forEach((it,i)=>addListing(it, i));
+}
+function addListing(it, i){
+  const id = 'l'+(DB.listings.length+1)+'_'+Math.random().toString(36).slice(2,6);
+  const images = (it.images && it.images.length) ? it.images : [it.icon];
+  const listing = Object.assign({
+    id, category:it.cat, condition:it.cond||'—', status:'active',
+    createdAt:Date.now()-((i+1)*3600*1000*7), views:Math.floor(Math.random()*80)+4,
+  }, it);
+  listing.images = images; // real uploaded photos win over the category icon fallback
+  DB.listings.push(listing);
+  return id;
+}
+function mediaSpan(l, emojiSize){
+  const src = l.images && l.images[0];
+  if(src && typeof src==='string' && src.startsWith('data:')){
+    return `<img src="${src}" style="width:100%;height:100%;object-fit:cover;display:block;">`;
+  }
+  return `<span style="font-size:${emojiSize}px;">${src||'📦'}</span>`;
+}
+seedListings();
+
+/* ============================= STATE ============================= */
+let state = {
+  locType:'City', radius:5, area:'Rancho Cucamonga, CA',
+  exploreFilter:'trending', exploreView:'list',
+  filters:{cat:null, dist:25, price:'any', cond:'any', sort:'newest'},
+  activeListing:null, activeConvo:null, sellPickup:new Set(), sellCondition:'Good', sellPriceType:'fixed',
+  reviewCtx:null, meetupCtx:null,
+};
+
+function seller(id){ return DB.users.find(u=>u.id===id) || DB.me; }
+function fmtPrice(l){ return l.price===0 ? 'Free' : ('$'+l.price+(l.type==='service'&&l.startingAt!==false?' start.':'')); }
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+/* ============================= ONBOARDING ============================= */
+function goOnb(n){
+  document.querySelectorAll('.onb-screen').forEach(s=>s.classList.remove('show'));
+  document.getElementById('onb'+n).classList.add('show');
+}
+function useMyLocation(){ toast('Using approximate current location'); goOnb(4); }
+function pickRadius(el){
+  document.querySelectorAll('.onb-radius-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel'); state.locType = el.dataset.v;
+}
+function finishOnboarding(){
+  const name = document.getElementById('ob-name').value.trim() || 'Neighbor';
+  const user = document.getElementById('ob-user').value.trim() || 'neighbor'+Math.floor(Math.random()*999);
+  DB.me.displayName = name; DB.me.username = user;
+  document.querySelectorAll('.onb-screen').forEach(s=>s.classList.remove('show'));
+  renderAll();
+  toast('Welcome to LOCALY, '+name+'!');
+}
+
+/* ============================= NAV ============================= */
+function nav(p){
+  ['home','explore','messages','profile'].forEach(k=>{
+    document.getElementById('page-'+k).style.display = (k===p)?'block':'none';
+  });
+  document.querySelectorAll('.nav-item[data-p]').forEach(n=>n.classList.toggle('active', n.dataset.p===p));
+  if(p==='explore') renderExplore();
+  if(p==='messages') renderConvos();
+  if(p==='profile') renderProfile();
+}
+function openScreen(id){ document.getElementById(id).classList.add('show'); }
+function closeScreen(id){ document.getElementById(id).classList.remove('show'); }
+function openSheet(id){ document.getElementById(id).classList.add('show'); }
+function closeSheet(el){ el.classList.remove('show'); }
+
+/* ============================= RENDER: HOME ============================= */
+function renderAll(){
+  document.getElementById('loc-label').textContent = state.area.split(',')[0];
+  renderCats();
+  renderRow('row-trending', topSort(DB.listings,'views').slice(0,6), true);
+  renderRow('row-recent', [...DB.listings].sort((a,b)=>b.createdAt-a.createdAt).slice(0,6), true);
+  renderRow('row-services', DB.listings.filter(l=>l.type==='service').slice(0,6), true);
+  renderBizRow();
+  renderNotifDot();
+}
+function renderCats(){
+  const wrap = document.getElementById('home-cats'); wrap.innerHTML='';
+  CATEGORIES.forEach(c=>{
+    const d = document.createElement('div');
+    d.className='cat-pill'; d.onclick=()=>{ nav('explore'); filterByCategory(c.id); };
+    d.innerHTML = `<div class="ic">${c.icon}</div><span>${c.label}</span>`;
+    wrap.appendChild(d);
+  });
+}
+function topSort(arr,key){ return [...arr].sort((a,b)=> (b[key]||0)-(a[key]||0)); }
+
+function listingCardHTML(l, wide){
+  const isFav = DB.favorites.has(l.id);
+  return `
+  <div class="card listing-card" onclick="openListing('${l.id}')">
+    <div class="img" style="background:var(--pine-tint);">
+      <div class="pin-tab"></div>
+      <button class="fav-btn" onclick="event.stopPropagation();toggleFav('${l.id}')">${isFav?'❤️':'🤍'}</button>
+      ${mediaSpan(l,38)}
+    </div>
+    <div class="card-body">
+      <p class="card-title">${l.title}</p>
+      <div class="card-price">${fmtPrice(l)}</div>
+      <div class="tear-tab">📍 ${l.dist} mi away</div>
+    </div>
+  </div>`;
+}
+function renderRow(id, arr, wide){
+  document.getElementById(id).innerHTML = arr.map(l=>listingCardHTML(l,wide)).join('') || `<p style="padding:0 16px;color:var(--ink-soft);font-size:13px;">Nothing here yet.</p>`;
+}
+function renderBizRow(){
+  document.getElementById('row-biz').innerHTML = DB.businesses.map(b=>`
+    <div class="card listing-card" style="width:170px;" onclick="openBusiness('${b.id}')">
+      <div class="img" style="background:var(--pine-dark); color:#fff;"><span style="font-size:36px;">${b.logo}</span></div>
+      <div class="card-body">
+        <p class="card-title">${b.name}</p>
+        <div class="rating-line"><span class="stars">★</span> ${b.rating} · ${b.reviews}</div>
+        <div class="tear-tab">📍 ${b.area}</div>
+      </div>
+    </div>`).join('');
+}
+function renderNotifDot(){
+  document.getElementById('notif-dot').style.display = DB.notifications.some(n=>!n.read) ? 'block':'none';
+}
+
+/* ============================= LOCATION ============================= */
+function setLocType(el){
+  document.querySelectorAll('#loc-type-chips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('loc-radius-wrap').style.display = el.dataset.t==='Nearby' ? 'block':'none';
+}
+function setRadiusChip(el){
+  document.querySelectorAll('#loc-radius-wrap .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); state.radius = +el.dataset.r;
+}
+function applyLocation(){
+  const typeEl = document.querySelector('#loc-type-chips .chip.active');
+  state.locType = typeEl ? typeEl.dataset.t : state.locType;
+  state.area = document.getElementById('loc-input').value || state.area;
+  closeSheet(document.getElementById('location-sheet'));
+  renderAll();
+  toast('Showing listings for '+ (state.locType==='Nearby' ? state.radius+' mi around you' : state.area));
+}
+
+/* ============================= SEARCH ============================= */
+function openSearch(){ openSheet('search-sheet'); document.getElementById('search-input').value=''; document.getElementById('search-results').innerHTML=''; setTimeout(()=>document.getElementById('search-input').focus(),50); }
+function runSearch(){
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const res = document.getElementById('search-results');
+  if(!q){ res.innerHTML=''; return; }
+  const matches = DB.listings.filter(l=> l.title.toLowerCase().includes(q) || l.desc.toLowerCase().includes(q) || l.category.includes(q));
+  res.innerHTML = matches.length ? matches.map(rowCardHTML).join('') : `<div class="empty-state"><div class="big">🔍</div>No results for "${q}"</div>`;
+}
+
+/* ============================= EXPLORE ============================= */
+function setExploreView(v){
+  state.exploreView=v;
+  document.getElementById('ex-list-btn').classList.toggle('active', v==='list');
+  document.getElementById('ex-map-btn').classList.toggle('active', v==='map');
+  document.getElementById('explore-list-view').style.display = v==='list'?'block':'none';
+  document.getElementById('explore-map-view').style.display = v==='map'?'block':'none';
+  if(v==='map') renderMap();
+}
+function setExploreFilter(el,f){
+  document.querySelectorAll('#page-explore .chip-row .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); state.exploreFilter=f; renderExplore();
+}
+function filterByCategory(catId){ state.filters.cat=catId; nav('explore'); renderExplore(); }
+function currentExploreSet(){
+  let arr=[...DB.listings];
+  switch(state.exploreFilter){
+    case 'recent': arr.sort((a,b)=>b.createdAt-a.createdAt); break;
+    case 'free': arr = arr.filter(l=>l.price===0); break;
+    case 'u25': arr = arr.filter(l=>l.price<=25); break;
+    case 'u50': arr = arr.filter(l=>l.price<=50); break;
+    case 'closest': arr.sort((a,b)=>a.dist-b.dist); break;
+    default: arr.sort((a,b)=>(b.views||0)-(a.views||0));
+  }
+  if(state.filters.cat) arr = arr.filter(l=>l.category===state.filters.cat);
+  return arr;
+}
+function renderExplore(){
+  document.getElementById('explore-list-view').innerHTML = currentExploreSet().map(rowCardHTML).join('') || `<div class="empty-state"><div class="big">🗺️</div>No listings match yet — try widening your area.</div>`;
+  if(state.exploreView==='map') renderMap();
+}
+function rowCardHTML(l){
+  const isFav = DB.favorites.has(l.id);
+  return `<div class="row-card" onclick="openListing('${l.id}')">
+    <div class="img" style="background:var(--pine-tint);overflow:hidden;"><div class="pin-tab" style="top:4px;left:4px;"></div>${mediaSpan(l,30)}</div>
+    <div class="info">
+      <p class="card-title">${l.title}</p>
+      <div class="card-price">${fmtPrice(l)}</div>
+      <div class="meta">📍 ${l.dist} mi · ${l.condition} · @${seller(l.seller).username}</div>
+    </div>
+    <button class="fav-btn" style="position:static;" onclick="event.stopPropagation();toggleFav('${l.id}')">${isFav?'❤️':'🤍'}</button>
+  </div>`;
+}
+function renderMap(){
+  const arr = currentExploreSet().slice(0,10);
+  let html = `<div class="map-canvas" id="mapcanvas"><div class="map-you" style="left:50%;top:50%;"></div></div>
+  <p style="text-align:center;font-size:11.5px;color:var(--ink-soft);margin-top:-6px;">Pins show approximate distance only — never an exact address.</p>`;
+  document.getElementById('explore-map-view').innerHTML = html;
+  const canvas = document.getElementById('mapcanvas');
+  arr.forEach((l,i)=>{
+    const angle = (i/arr.length)*2*Math.PI + 0.4;
+    const rad = 40 + Math.min(l.dist,6)*32;
+    const x = 50 + Math.cos(angle)*rad*0.55;
+    const y = 50 + Math.sin(angle)*rad*0.42;
+    const pin=document.createElement('div');
+    pin.className='map-pin'; pin.style.left=Math.max(8,Math.min(92,x))+'%'; pin.style.top=Math.max(10,Math.min(90,y))+'%';
+    pin.onclick=()=>openListing(l.id);
+    pin.innerHTML = `<div class="dot"><span>${l.images[0]}</span></div><div class="lbl">${l.dist} mi</div>`;
+    canvas.appendChild(pin);
+  });
+}
+
+/* ============================= FILTER SHEET ============================= */
+(function initFilterCats(){
+  document.addEventListener('DOMContentLoaded',()=>{
+    const wrap=document.getElementById('filter-cats');
+    wrap.innerHTML = `<div class="chip active" data-cat="" onclick="setFilterChip(this,'cat')">Any</div>` + CATEGORIES.map(c=>`<div class="chip" data-cat="${c.id}" onclick="setFilterChip(this,'cat')">${c.label}</div>`).join('');
+  });
+})();
+function setFilterChip(el,group){
+  const parent = el.parentElement;
+  parent.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(group==='cat') state.filters.cat = el.dataset.cat||null;
+  if(group==='dist') state.filters.dist = +el.dataset.d;
+  if(group==='price') state.filters.price = el.dataset.p;
+  if(group==='cond') state.filters.cond = el.dataset.c;
+  if(group==='sort') state.filters.sort = el.dataset.s;
+}
+function applyFilters(){
+  let arr = [...DB.listings];
+  if(state.filters.cat) arr = arr.filter(l=>l.category===state.filters.cat);
+  arr = arr.filter(l=>l.dist<=state.filters.dist);
+  if(state.filters.price!=='any'){ const [lo,hi]=state.filters.price.split('-').map(Number); arr=arr.filter(l=>l.price>=lo&&l.price<=hi); }
+  if(state.filters.cond!=='any') arr = arr.filter(l=>l.condition===state.filters.cond || (state.filters.cond==='Good' && ['Good','Like New','New'].includes(l.condition)));
+  if(state.filters.sort==='closest') arr.sort((a,b)=>a.dist-b.dist);
+  if(state.filters.sort==='cheapest') arr.sort((a,b)=>a.price-b.price);
+  if(state.filters.sort==='rated') arr.sort((a,b)=>seller(b.seller).rating-seller(a.seller).rating);
+  if(state.filters.sort==='newest') arr.sort((a,b)=>b.createdAt-a.createdAt);
+  closeSheet(document.getElementById('filter-sheet'));
+  document.getElementById('explore-list-view').innerHTML = arr.map(rowCardHTML).join('') || `<div class="empty-state"><div class="big">🗺️</div>No matches — try loosening a filter.</div>`;
+  nav('explore');
+  document.getElementById('explore-list-view').innerHTML = arr.map(rowCardHTML).join('') || `<div class="empty-state"><div class="big">🗺️</div>No matches — try loosening a filter.</div>`;
+  toast(arr.length+' results found');
+}
+
+/* ============================= FAVORITES ============================= */
+function toggleFav(id){
+  if(DB.favorites.has(id)) DB.favorites.delete(id); else DB.favorites.add(id);
+  renderAll(); renderExplore();
+  if(document.getElementById('screen-favorites').classList.contains('show')) renderFavorites();
+  if(document.getElementById('screen-listing').classList.contains('show') && state.activeListing) openListing(state.activeListing);
+}
+function renderFavorites(){
+  const favL = DB.listings.filter(l=>DB.favorites.has(l.id));
+  document.getElementById('favorites-body').innerHTML = favL.length ? favL.map(rowCardHTML).join('') : `<div class="empty-state"><div class="big">🤍</div>Nothing favorited yet. Tap the heart on any listing to save it here.</div>`;
+}
+
+/* ============================= LISTING DETAIL ============================= */
+function openListing(id){
+  const l = DB.listings.find(x=>x.id===id); if(!l) return;
+  state.activeListing = id;
+  const s = seller(l.seller);
+  document.getElementById('listing-title-top').textContent = l.title;
+  const isFav = DB.favorites.has(id);
+  document.getElementById('listing-body').innerHTML = `
+    <div class="img" style="height:220px; background:var(--pine-tint); display:flex; align-items:center; justify-content:center; position:relative;">
+      <div class="pin-tab" style="top:10px;left:10px;width:26px;height:26px;"></div>
+      <button class="fav-btn" style="top:10px;right:10px;" onclick="toggleFav('${l.id}')">${isFav?'❤️':'🤍'}</button>
+      ${mediaSpan(l,80)}
+    </div>
+    <div style="padding:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <h2 class="display" style="margin:0;font-size:20px;">${l.title}</h2>
+        <div class="card-price" style="font-size:19px;">${fmtPrice(l)}${l.neg?' <span style="font-size:11px;color:var(--ink-soft);font-family:Inter;font-weight:600;">(negotiable)</span>':''}</div>
+      </div>
+      <div class="tear-tab" style="width:auto;border:none;padding:0;margin-top:6px;">📍 ${l.dist} mi away · ${l.condition}</div>
+      <p style="font-size:14.5px;line-height:1.5;color:var(--ink);margin-top:14px;">${l.desc}</p>
+
+      <div style="background:var(--card);border:1px solid var(--line-soft);border-radius:14px;padding:12px;margin-top:14px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="${l.biz?`openBusiness('${l.biz}')`:''}">
+        <div class="avatar">${s.name?s.name[0]:'?'}</div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:14px;">@${s.username}</div>
+          <div class="rating-line"><span class="stars">★</span> ${s.rating} · ${s.count} transactions</div>
+        </div>
+        ${l.biz?'<span style="font-size:12px;color:var(--pine);font-weight:700;">View shop →</span>':''}
+      </div>
+
+      <label class="field-label">Pickup options</label>
+      <div class="chip-row">${(l.pickup||[]).map(p=>`<div class="chip" style="cursor:default;">${p}</div>`).join('')}</div>
+
+      <div class="safety-note">⚠️ Meet in a public place. LOCALY never shares a seller's exact home address.</div>
+
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="btn btn-secondary btn-block" onclick="startMessage('${l.id}')">💬 Message</button>
+        <button class="btn btn-primary btn-block" onclick="startBuy('${l.id}')">${l.type==='service'?'Request service':'Buy'}</button>
+      </div>
+    </div>`;
+  openScreen('screen-listing');
+}
+
+/* ============================= MESSAGING / CONVOS ============================= */
+function findOrCreateConvo(listingId){
+  const l = DB.listings.find(x=>x.id===listingId);
+  let c = DB.conversations.find(c=>c.listingId===listingId && c.otherId===l.seller);
+  if(!c){
+    c = {id:'c'+(DB.conversations.length+1), listingId, otherId:l.seller, msgs:[], txId:null};
+    DB.conversations.unshift(c);
+  }
+  return c;
+}
+function startMessage(listingId){
+  const l = DB.listings.find(x=>x.id===listingId);
+  const c = findOrCreateConvo(listingId);
+  if(c.msgs.length===0){
+    c.msgs.push({from:'them', text:'Hey! Yes, this is still available 🙂', type:'text'});
+  }
+  openThread(c.id);
+}
+function startBuy(listingId){
+  const l = DB.listings.find(x=>x.id===listingId);
+  const c = findOrCreateConvo(listingId);
+  let tx = DB.transactions.find(t=>t.id===c.txId);
+  if(!tx){
+    tx = {id:'t'+(DB.transactions.length+1), listingId, buyer:'me', seller:l.seller, price:l.price, status:'Interested', payment:null, meeting:null};
+    DB.transactions.push(tx); c.txId = tx.id;
+    c.msgs.push({from:'me', text:`I'd like to ${l.type==='service'?'book':'buy'} "${l.title}" for ${fmtPrice(l)}.`, type:'text'});
+    c.msgs.push({from:'them', text:l.neg? "Sounds good — happy to work with that, or send an offer if you'd like." : "Great, let's set it up!", type:'text'});
+    addNotif(`Started a transaction for ${l.title}`);
+  }
+  openThread(c.id);
+}
+function renderConvos(){
+  const wrap = document.getElementById('convo-list');
+  if(!DB.conversations.length){ wrap.innerHTML = `<div class="empty-state"><div class="big">💬</div>No conversations yet. Message a seller from any listing.</div>`; return; }
+  wrap.innerHTML = DB.conversations.map(c=>{
+    const l = DB.listings.find(x=>x.id===c.listingId);
+    const s = seller(c.otherId);
+    const last = c.msgs[c.msgs.length-1];
+    return `<div class="convo-row" onclick="openThread('${c.id}')">
+      <div class="avatar">${s.name?s.name[0]:'?'}</div>
+      <div class="info">
+        <div class="name-row"><b>@${s.username}</b><span style="color:var(--ink-soft);font-size:11px;">${l?l.title:''}</span></div>
+        <div class="preview">${last ? (last.type==='text'? last.text : '📎 '+ (last.type||'update')) : 'Say hello 👋'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function openThread(convoId){
+  state.activeConvo = convoId;
+  const c = DB.conversations.find(x=>x.id===convoId);
+  const l = DB.listings.find(x=>x.id===c.listingId);
+  const s = seller(c.otherId);
+  document.getElementById('thread-name').textContent = '@'+s.username;
+  document.getElementById('thread-avatar').textContent = s.name?s.name[0]:'?';
+  renderThreadStatus(c);
+  renderThreadMsgs(c);
+  renderThreadQuick(c,l);
+  openScreen('screen-thread');
+}
+const STATUS_ORDER=['Interested','Negotiating','Price Agreed','Meeting Proposed','Meeting Confirmed','Payment Pending','Completed'];
+function renderThreadStatus(c){
+  const wrap = document.getElementById('thread-status');
+  if(!c.txId){ wrap.innerHTML=''; return; }
+  const tx = DB.transactions.find(t=>t.id===c.txId);
+  const idx = STATUS_ORDER.indexOf(tx.status);
+  let dots='';
+  STATUS_ORDER.forEach((s,i)=>{
+    dots += `<div class="status-dot ${i<=idx?'done':''}"></div>`;
+    if(i<STATUS_ORDER.length-1) dots += `<div class="status-line ${i<idx?'done':''}"></div>`;
+  });
+  wrap.innerHTML = `<div class="status-track">${dots}</div><p style="text-align:center;font-size:12.5px;font-weight:700;color:var(--pine-dark);margin:2px 0 8px;">${tx.status}${tx.status==='Cancelled'?'':''}</p>`;
+}
+function bubbleHTML(m){
+  if(m.type==='text') return `<div class="bubble ${m.from==='me'?'me':'them'}">${m.text}</div>`;
+  if(m.type==='offer') return `<div class="propose-card"><h4>💰 Price offer</h4><p style="margin:0;font-size:14px;">${m.from==='me'?'You':'They'} offered <b>$${m.amount}</b></p>
+    ${m.status==='pending' && m.from!=='me' ? `<div class="row-actions"><button class="btn btn-primary btn-sm" onclick="respondOffer('${m.id}','accept')">Accept</button><button class="btn btn-outline btn-sm" onclick="respondOffer('${m.id}','reject')">Decline</button></div>` : `<p style="margin:6px 0 0;font-size:12px;color:var(--ink-soft);">${m.status==='accepted'?'✅ Accepted':m.status==='rejected'?'❌ Declined':'Waiting for response...'}</p>`}
+    </div>`;
+  if(m.type==='meeting') return `<div class="propose-card"><h4>📍 Meeting proposal</h4><p style="margin:0;font-size:14px;">${m.location}<br>${m.time}</p>
+    ${m.status==='pending' && m.from!=='me' ? `<div class="row-actions"><button class="btn btn-primary btn-sm" onclick="respondMeeting('${m.id}','accept')">Accept</button><button class="btn btn-outline btn-sm" onclick="respondMeeting('${m.id}','reject')">Suggest another</button></div>` : `<p style="margin:6px 0 0;font-size:12px;color:var(--ink-soft);">${m.status==='accepted'?'✅ Confirmed':m.status==='rejected'?'Needs a new proposal':'Waiting for response...'}</p>`}
+    </div>`;
+  if(m.type==='system') return `<div style="align-self:center;font-size:11.5px;color:var(--ink-soft);background:var(--pine-tint);padding:4px 12px;border-radius:99px;">${m.text}</div>`;
+  return '';
+}
+function renderThreadMsgs(c){
+  const wrap = document.getElementById('thread-msgs');
+  wrap.innerHTML = c.msgs.map(bubbleHTML).join('');
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function renderThreadQuick(c,l){
+  const wrap = document.getElementById('thread-quick');
+  if(!c.txId){ wrap.innerHTML=''; return; }
+  const tx = DB.transactions.find(t=>t.id===c.txId);
+  let btns = [];
+  if(l && l.neg && !['Meeting Confirmed','Payment Pending','Completed'].includes(tx.status)) btns.push(`<button class="btn btn-secondary btn-sm" onclick="openSheet('offer-sheet')">💰 Make offer</button>`);
+  if(!['Payment Pending','Completed'].includes(tx.status)) btns.push(`<button class="btn btn-secondary btn-sm" onclick="openMeetupFor('${c.id}')">📍 Propose meetup</button>`);
+  if(tx.status==='Meeting Confirmed') btns.push(`<button class="btn btn-marigold btn-sm" onclick="openSheet('payment-sheet')">💳 Choose payment</button>`);
+  if(tx.status==='Payment Pending') btns.push(`<button class="btn btn-primary btn-sm" onclick="markCompleted('${c.id}')">✅ Mark completed</button>`);
+  if(tx.status==='Completed') btns.push(`<button class="btn btn-outline btn-sm" onclick="openReview('${c.id}')">⭐ Leave review</button>`);
+  wrap.innerHTML = btns.join('');
+}
+function sendThreadMsg(){
+  const input = document.getElementById('thread-input');
+  const text = input.value.trim(); if(!text) return;
+  const c = DB.conversations.find(x=>x.id===state.activeConvo);
+  c.msgs.push({from:'me', text, type:'text'});
+  input.value='';
+  renderThreadMsgs(c);
+  setTimeout(()=>{
+    c.msgs.push({from:'them', text: autoReply(text), type:'text'});
+    renderThreadMsgs(c);
+  }, 500);
+}
+function autoReply(t){
+  const opts = ["Sounds good!", "Works for me 👍", "Yep, still available.", "Let me check and get back to you.", "That should be fine!"];
+  return opts[Math.floor(Math.random()*opts.length)];
+}
+function openSheet_setCtx(id){ state.meetupCtx = id; }
+function openMeetupFor(convoId){ state.meetupCtx = convoId; openSheet('meetup-sheet'); }
+let meetupLoc='';
+function pickMeetupLoc(el, loc){
+  document.querySelectorAll('#meetup-loc-chips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); meetupLoc = loc; document.getElementById('meetup-loc-custom').value='';
+}
+function sendMeetupProposal(){
+  const custom = document.getElementById('meetup-loc-custom').value.trim();
+  const loc = custom || meetupLoc || 'Public location';
+  const time = document.getElementById('meetup-time').value.trim() || 'Time TBD';
+  const c = DB.conversations.find(x=>x.id===state.meetupCtx);
+  const mid = 'm'+Math.random().toString(36).slice(2,7);
+  c.msgs.push({id:mid, from:'me', type:'meeting', location:loc, time, status:'pending'});
+  closeSheet(document.getElementById('meetup-sheet'));
+  document.getElementById('meetup-time').value=''; document.getElementById('meetup-loc-custom').value='';
+  const tx = DB.transactions.find(t=>t.id===c.txId); if(tx) tx.status='Meeting Proposed';
+  renderThreadMsgs(c); renderThreadStatus(c); renderThreadQuick(c, DB.listings.find(l=>l.id===c.listingId));
+  setTimeout(()=>{ respondMeeting(mid,'accept', true); }, 900);
+}
+function respondMeeting(mid, action, isAuto){
+  const c = DB.conversations.find(x=>x.id===state.activeConvo) || DB.conversations.find(cc=>cc.msgs.some(m=>m.id===mid));
+  const m = c.msgs.find(x=>x.id===mid); if(!m) return;
+  m.status = action==='accept' ? 'accepted' : 'rejected';
+  if(action==='accept'){
+    c.msgs.push({type:'system', text:'Meeting confirmed ✅'});
+    const tx = DB.transactions.find(t=>t.id===c.txId); if(tx){ tx.status='Meeting Confirmed'; tx.meeting={location:m.location, time:m.time}; }
+    addNotif('Meeting confirmed: '+m.location);
+  } else {
+    c.msgs.push({from:'them', type:'text', text:'Can we pick a different spot or time?'});
+  }
+  renderThreadMsgs(c); renderThreadStatus(c); renderThreadQuick(c, DB.listings.find(l=>l.id===c.listingId));
+}
+function sendOffer(){
+  const amt = +document.getElementById('offer-amount').value;
+  if(!amt){ toast('Enter an amount'); return; }
+  const c = DB.conversations.find(x=>x.id===state.activeConvo);
+  const mid='o'+Math.random().toString(36).slice(2,7);
+  c.msgs.push({id:mid, from:'me', type:'offer', amount:amt, status:'pending'});
+  const tx = DB.transactions.find(t=>t.id===c.txId); if(tx) tx.status='Negotiating';
+  closeSheet(document.getElementById('offer-sheet'));
+  document.getElementById('offer-amount').value='';
+  renderThreadMsgs(c); renderThreadStatus(c);
+  setTimeout(()=>respondOffer(mid,'accept',true), 900);
+}
+function respondOffer(mid, action){
+  const c = DB.conversations.find(x=>x.id===state.activeConvo) || DB.conversations.find(cc=>cc.msgs.some(m=>m.id===mid));
+  const m = c.msgs.find(x=>x.id===mid); if(!m) return;
+  m.status = action==='accept'?'accepted':'rejected';
+  const tx = DB.transactions.find(t=>t.id===c.txId);
+  if(action==='accept'){
+    c.msgs.push({type:'system', text:`Price agreed: $${m.amount} ✅`});
+    if(tx){ tx.status='Price Agreed'; tx.price=m.amount; }
+    addNotif('Offer accepted at $'+m.amount);
+  } else {
+    c.msgs.push({from:'them', type:'text', text:"That's a bit low for me, sorry!"});
+  }
+  renderThreadMsgs(c); renderThreadStatus(c); renderThreadQuick(c, DB.listings.find(l=>l.id===c.listingId));
+}
+function choosePayment(method){
+  const c = DB.conversations.find(x=>x.id===state.activeConvo);
+  const tx = DB.transactions.find(t=>t.id===c.txId);
+  tx.payment = method; tx.status='Payment Pending';
+  c.msgs.push({type:'system', text:`Payment method set: ${method}`});
+  closeSheet(document.getElementById('payment-sheet'));
+  renderThreadMsgs(c); renderThreadStatus(c); renderThreadQuick(c, DB.listings.find(l=>l.id===c.listingId));
+  toast(method==='Cash' ? "We'll mark this complete once you both confirm." : 'Apple Pay ready — funds held securely until confirmed.');
+}
+function markCompleted(convoId){
+  const c = DB.conversations.find(x=>x.id===convoId);
+  const tx = DB.transactions.find(t=>t.id===c.txId);
+  tx.status='Completed';
+  const l = DB.listings.find(x=>x.id===c.listingId);
+  l.status='sold';
+  c.msgs.push({type:'system', text:'Transaction completed 🎉'});
+  DB.me.transactions++;
+  addNotif('Transaction completed: '+l.title);
+  renderThreadMsgs(c); renderThreadStatus(c); renderThreadQuick(c,l);
+  toast('Marked as completed!');
+}
+function openReview(convoId){
+  const c = DB.conversations.find(x=>x.id===convoId);
+  state.reviewCtx = c;
+  document.getElementById('review-target').textContent = 'How was @'+seller(c.otherId).username+'?';
+  document.querySelectorAll('#review-stars span').forEach(s=>{
+    s.classList.remove('on'); s.onclick=()=>setStars(+s.dataset.v);
+  });
+  document.getElementById('review-text').value='';
+  window._starVal=0;
+  openSheet('review-sheet');
+}
+function setStars(v){ window._starVal=v; document.querySelectorAll('#review-stars span').forEach(s=>s.classList.toggle('on', +s.dataset.v<=v)); }
+function submitReview(){
+  const v = window._starVal||0; if(!v){ toast('Pick a star rating'); return; }
+  const c = state.reviewCtx;
+  DB.reviews.push({reviewedUserId:c.otherId, rating:v, text:document.getElementById('review-text').value.trim()});
+  const s = seller(c.otherId);
+  const relevant = DB.reviews.filter(r=>r.reviewedUserId===c.otherId);
+  s.rating = +(relevant.reduce((a,r)=>a+r.rating,0)/relevant.length).toFixed(1);
+  s.count++;
+  closeSheet(document.getElementById('review-sheet'));
+  toast('Review submitted — thanks!');
+}
+
+/* ============================= NOTIFICATIONS ============================= */
+function addNotif(text){
+  DB.notifications.unshift({text, read:false, time:'Just now'});
+  renderNotifDot();
+}
+function renderNotifList(){
+  document.getElementById('notif-list').innerHTML = DB.notifications.length ? DB.notifications.map(n=>`
+    <div class="convo-row" style="cursor:default;"><div class="avatar" style="background:var(--marigold);color:#3A2705;">🔔</div>
+      <div class="info"><div class="name-row"><b>${n.text}</b></div><div class="preview">${n.time}</div></div></div>`).join('')
+    : `<div class="empty-state"><div class="big">🔔</div>You're all caught up.</div>`;
+  DB.notifications.forEach(n=>n.read=true); renderNotifDot();
+}
+document.getElementById('notif-sheet').addEventListener('transitionend',()=>{});
+const _origOpenSheet = openSheet;
+openSheet = function(id){ _origOpenSheet(id); if(id==='notif-sheet') renderNotifList(); };
+
+/* ============================= SELL FLOW ============================= */
+function openSell(){
+  state.sellPickup = new Set(); state.sellCondition='Good'; state.sellPriceType='fixed'; state.sellPhotos=[];
+  document.getElementById('sell-body').innerHTML = `
+    <div style="padding:16px;">
+      <label class="field-label">Photos</label>
+      <div id="photo-row" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:4px 0 0;">Add a few real photos — the first one becomes the cover image buyers see everywhere.</p>
+
+      <label class="field-label">Listing type</label>
+      <div class="toggle-pair">
+        <button class="active" id="type-product" onclick="setSellType('product')">Product</button>
+        <button id="type-service" onclick="setSellType('service')">Service</button>
+      </div>
+
+      <label class="field-label">Title</label>
+      <input type="text" id="sell-title" placeholder="e.g. Nike Basketball Shoes">
+
+      <label class="field-label">Description</label>
+      <textarea id="sell-desc" placeholder="Barely used, size 10. Pickup only."></textarea>
+
+      <label class="field-label">Price</label>
+      <div class="chip-row" style="margin-bottom:8px;">
+        <div class="chip active" data-pt="fixed" onclick="setPriceType(this)">Fixed price</div>
+        <div class="chip" data-pt="neg" onclick="setPriceType(this)">Negotiable</div>
+        <div class="chip" data-pt="free" onclick="setPriceType(this)">Free</div>
+      </div>
+      <input type="number" id="sell-price" placeholder="$0">
+
+      <label class="field-label">Category</label>
+      <select id="sell-cat">${CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${c.label}</option>`).join('')}</select>
+
+      <div id="condition-wrap">
+        <label class="field-label">Condition</label>
+        <div class="chip-row" id="sell-cond-row">
+          <div class="chip" data-cd="New" onclick="setCondChip(this)">New</div>
+          <div class="chip" data-cd="Like New" onclick="setCondChip(this)">Like New</div>
+          <div class="chip active" data-cd="Good" onclick="setCondChip(this)">Good</div>
+          <div class="chip" data-cd="Fair" onclick="setCondChip(this)">Fair</div>
+          <div class="chip" data-cd="Used" onclick="setCondChip(this)">Used</div>
+        </div>
+      </div>
+
+      <label class="field-label">General area (never your exact address)</label>
+      <input type="text" id="sell-area" value="${state.area}">
+
+      <label class="field-label">Pickup options</label>
+      <div class="chip-row" id="sell-pickup-row">
+        <div class="chip" data-pk="Local pickup" onclick="togglePickupChip(this)">Local pickup</div>
+        <div class="chip" data-pk="Meet somewhere" onclick="togglePickupChip(this)">Meet somewhere</div>
+        <div class="chip" data-pk="Seller delivery" onclick="togglePickupChip(this)">Seller delivery</div>
+        <div class="chip" data-pk="Buyer pickup" onclick="togglePickupChip(this)">Buyer pickup</div>
+      </div>
+
+      <button class="btn btn-primary btn-block" style="margin-top:20px;" onclick="publishListing()">Publish listing</button>
+    </div>`;
+  renderPhotoRow();
+  openScreen('screen-sell');
+}
+function renderPhotoRow(){
+  const row = document.getElementById('photo-row'); if(!row) return;
+  const uploadTile = `<label style="width:72px;height:72px;border:1.5px dashed var(--line);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--ink-soft);cursor:pointer;flex:none;">
+      📷<input type="file" accept="image/*" multiple style="display:none;" onchange="addPhoto(event)">
+    </label>`;
+  const thumbs = state.sellPhotos.map((src,i)=>`
+    <div style="position:relative;width:72px;height:72px;flex:none;">
+      <img src="${src}" style="width:72px;height:72px;border-radius:12px;object-fit:cover;display:block;">
+      ${i===0?'<span style="position:absolute;bottom:2px;left:2px;background:var(--marigold);color:#3A2705;font-size:9px;font-weight:800;padding:1px 5px;border-radius:6px;">COVER</span>':''}
+      <button onclick="removePhoto(${i})" aria-label="Remove photo" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--clay);color:#fff;border:none;font-size:11px;line-height:1;cursor:pointer;">✕</button>
+    </div>`).join('');
+  row.innerHTML = uploadTile + thumbs;
+}
+function addPhoto(ev){
+  const files = Array.from(ev.target.files || []);
+  files.forEach(f=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{ state.sellPhotos.push(reader.result); renderPhotoRow(); };
+    reader.readAsDataURL(f);
+  });
+  ev.target.value = '';
+}
+function removePhoto(i){ state.sellPhotos.splice(i,1); renderPhotoRow(); }
+function setSellType(t){
+  document.getElementById('type-product').classList.toggle('active', t==='product');
+  document.getElementById('type-service').classList.toggle('active', t==='service');
+  document.getElementById('condition-wrap').style.display = t==='product' ? 'block':'none';
+  state.sellType = t;
+}
+state.sellType='product';
+function setPriceType(el){ document.querySelectorAll('#sell-body [data-pt]').forEach(c=>c.classList.remove('active')); el.classList.add('active'); state.sellPriceType=el.dataset.pt; }
+function setCondChip(el){ document.querySelectorAll('#sell-cond-row .chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); state.sellCondition=el.dataset.cd; }
+function togglePickupChip(el){ el.classList.toggle('active'); const v=el.dataset.pk; if(state.sellPickup.has(v)) state.sellPickup.delete(v); else state.sellPickup.add(v); }
+function publishListing(){
+  const title = document.getElementById('sell-title').value.trim();
+  const desc = document.getElementById('sell-desc').value.trim();
+  let price = +document.getElementById('sell-price').value || 0;
+  if(state.sellPriceType==='free') price=0;
+  const cat = document.getElementById('sell-cat').value;
+  const area = document.getElementById('sell-area').value.trim() || state.area;
+  if(!title){ toast('Give your listing a title'); return; }
+  if(state.sellPickup.size===0){ toast('Pick at least one pickup option'); return; }
+  const id = addListing({
+    title, desc: desc||'No description provided.', price, neg: state.sellPriceType==='neg',
+    cat, cond: state.sellCondition, icon: CATEGORIES.find(c=>c.id===cat).icon,
+    dist: +(Math.random()*3+0.3).toFixed(1), seller:'me', type: state.sellType,
+    pickup:[...state.sellPickup], images: state.sellPhotos.slice(),
+  });
+  closeScreen('screen-sell');
+  renderAll(); renderExplore();
+  addNotif('Your listing "'+title+'" is live');
+  toast('Listing published!');
+  openListing(id);
+}
+
+/* ============================= BUSINESS ============================= */
+function openBusiness(id){
+  const b = DB.businesses.find(x=>x.id===id); if(!b) return;
+  const products = DB.listings.filter(l=>l.biz===id);
+  document.getElementById('business-body').innerHTML = `
+    <div class="biz-cover"></div>
+    <div class="biz-logo">${b.logo}</div>
+    <div style="padding:40px 16px 16px;">
+      <h2 class="display" style="margin:0;font-size:20px;">${b.name}</h2>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin:2px 0 8px;">${b.tagline}</p>
+      <div class="rating-line"><span class="stars">★</span> ${b.rating} · ${b.reviews} reviews · 📍 ${b.area}</div>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin-top:6px;">🕒 ${b.hours}</p>
+      <div style="display:flex;gap:10px;margin-top:14px;">
+        <button class="btn btn-secondary btn-block" onclick="toast('Following '+'${b.name}')">＋ Follow</button>
+        <button class="btn btn-primary btn-block" onclick="messageBusiness('${b.id}')">💬 Message</button>
+      </div>
+      <label class="field-label">Products & services</label>
+      <div class="list-grid" style="padding:0;">${products.map(gridCardHTML).join('') || '<p style="color:var(--ink-soft);font-size:13px;">No listings yet.</p>'}</div>
+    </div>`;
+  openScreen('screen-business');
+}
+function gridCardHTML(l){
+  return `<div class="card" onclick="openListing('${l.id}')">
+    <div class="img" style="height:100px;background:var(--pine-tint);display:flex;align-items:center;justify-content:center;overflow:hidden;">${mediaSpan(l,32)}</div>
+    <div class="card-body"><p class="card-title">${l.title}</p><div class="card-price">${fmtPrice(l)}</div></div>
+  </div>`;
+}
+function messageBusiness(bizId){
+  const b = DB.businesses.find(x=>x.id===bizId);
+  const l = DB.listings.find(x=>x.biz===bizId);
+  if(l) startMessage(l.id); else toast('Messaging '+b.name);
+}
+
+/* ============================= PROFILE ============================= */
+function renderProfile(){
+  const myListings = DB.listings.filter(l=>l.seller==='me' && l.status!=='sold');
+  const soldListings = DB.listings.filter(l=>l.seller==='me' && l.status==='sold');
+  const myReviews = DB.reviews.filter(r=>r.reviewedUserId==='me');
+  document.getElementById('profile-body').innerHTML = `
+    <div style="display:flex;gap:14px;align-items:center;">
+      <div class="avatar" style="width:64px;height:64px;font-size:22px;">${(DB.me.displayName||'Y')[0]}</div>
+      <div>
+        <h2 class="display" style="margin:0;font-size:19px;">@${DB.me.username}</h2>
+        <p style="font-size:13px;color:var(--ink-soft);margin:2px 0;">📍 ${state.area}</p>
+        <div class="rating-line"><span class="stars">★</span> ${DB.me.rating||'New'} · ${DB.me.transactions} completed</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <div style="flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:10px;text-align:center;"><b>${myListings.length}</b><br><span style="font-size:11.5px;color:var(--ink-soft);">Active</span></div>
+      <div style="flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:10px;text-align:center;"><b>${soldListings.length}</b><br><span style="font-size:11.5px;color:var(--ink-soft);">Sold</span></div>
+      <div style="flex:1;background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:10px;text-align:center;"><b>${myReviews.length}</b><br><span style="font-size:11.5px;color:var(--ink-soft);">Reviews</span></div>
+    </div>
+    <label class="field-label">My listings</label>
+    <div class="list-grid" style="padding:0;">${myListings.map(gridCardHTML).join('') || '<p style="color:var(--ink-soft);font-size:13px;">You haven&apos;t posted anything yet — tap the + button to sell.</p>'}</div>
+    ${soldListings.length? `<label class="field-label">Sold</label><div class="list-grid" style="padding:0;">${soldListings.map(gridCardHTML).join('')}</div>`:''}
+    ${myReviews.length? `<label class="field-label">Reviews</label>` + myReviews.map(r=>`<div style="background:var(--card);border:1px solid var(--line-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px;"><span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span><p style="font-size:13px;margin:4px 0 0;">${r.text||'(no comment)'}</p></div>`).join('') : ''}
+  `;
+}
+
+/* ============================= REPORT / ADMIN ============================= */
+function reportSomething(){
+  DB.reports.push({reason:'User-submitted report', status:'Open', time:'Just now'});
+  toast('Thanks — our team will review this report.');
+}
+function renderAdmin(){
+  document.getElementById('admin-body').innerHTML = `
+    <label class="field-label" style="padding:14px 16px 0;">Users (${DB.users.length+1})</label>
+    ${[{username:DB.me.username||'you', rating:DB.me.rating||'—'}, ...DB.users].map(u=>`
+      <div class="adm-row"><span>@${u.username}</span><span class="adm-tag">★ ${u.rating}</span></div>`).join('')}
+    <label class="field-label" style="padding:14px 16px 0;">Listings (${DB.listings.length})</label>
+    ${DB.listings.slice(0,8).map(l=>`
+      <div class="adm-row"><span>${l.title}</span>
+        <span style="display:flex;gap:8px;align-items:center;">
+          <span class="adm-tag ${l.status==='sold'?'warn':''}">${l.status}</span>
+          <button class="btn btn-clay btn-sm" onclick="adminRemove('${l.id}')">Remove</button>
+        </span></div>`).join('')}
+    <label class="field-label" style="padding:14px 16px 0;">Reports (${DB.reports.length})</label>
+    ${DB.reports.length ? DB.reports.map(r=>`<div class="adm-row"><span>${r.reason}</span><span class="adm-tag warn">${r.status}</span></div>`).join('') : `<p style="padding:0 16px;color:var(--ink-soft);font-size:13px;">No reports filed.</p>`}
+    <label class="field-label" style="padding:14px 16px 0;">Transactions (${DB.transactions.length})</label>
+    ${DB.transactions.length ? DB.transactions.map(t=>{const l=DB.listings.find(x=>x.id===t.listingId); return `<div class="adm-row"><span>${l?l.title:'—'}</span><span class="adm-tag">${t.status}</span></div>`;}).join('') : `<p style="padding:0 16px 16px;color:var(--ink-soft);font-size:13px;">No transactions yet.</p>`}
+  `;
+}
+function adminRemove(id){
+  DB.listings = DB.listings.filter(l=>l.id!==id);
+  renderAdmin(); renderAll(); renderExplore();
+  toast('Listing removed by admin');
+}
+
+/* ============================= INIT ============================= */
+document.getElementById('filter-cats').innerHTML = `<div class="chip active" data-cat="" onclick="setFilterChip(this,'cat')">Any</div>` + CATEGORIES.map(c=>`<div class="chip" data-cat="${c.id}" onclick="setFilterChip(this,'cat')">${c.label}</div>`).join('');
+renderAll();
+
+/* ============================= PWA: register service worker ============================= */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{ /* not served over http(s), ignore */ });
+  });
+}
+</script>
+</body>
+</html>
